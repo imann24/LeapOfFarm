@@ -25,7 +25,7 @@ public class PlayerAnimationController : MonoBehaviour {
 	
 	}
 
-	void ChangeDirection (PlayerController.Direction direction) {
+	private void ChangeDirection (PlayerController.Direction direction) {
 		PlayerController.Direction previousDirection;
 		animator.enabled = true;
 		if (animator.GetBool("movingLeft")) {

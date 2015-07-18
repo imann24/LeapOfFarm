@@ -21,7 +21,7 @@ public class GridController : MonoBehaviour {
 			for (int y = 0; y < sizeOfGrid; y++) {
 				GameObject square = (GameObject) Instantiate(gridSpace, new Vector2(x - sizeOfGrid/2, y - sizeOfGrid/2), Quaternion.identity);
 				square.transform.parent = transform;
-
+				square.GetComponent<GridSpace>().SetBehavior(GridSpace.Space.Solid);
 			}
 		}
 	}
