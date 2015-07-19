@@ -1,23 +1,31 @@
-﻿//#define DEBUG
+﻿#define DEBUG
 
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class PlayerAnimationController : MonoBehaviour {
 	private Sprite stillIdleFrame;
-
+	private Player player;
 	private Animator animator;
 	private SpriteRenderer sprite;
+
+	public Image healthBar;
+
+	//coroutines 
+	IEnumerator healthBarAnimation; 
 
 	// Use this for initialization
 	void Start () {
 		PlayerController.OnChangeDirection += ChangeDirection;
+		Player.OnPlayerDamaged += UpdateHealthBar;
 
 		SetReferences();
 	}
 
 	void OnDestroy () {
 		PlayerController.OnChangeDirection -= ChangeDirection;
+		Player.OnPlayerDamaged -= UpdateHealthBar;
 	}
 	
 	// Update is called once per frame
@@ -50,15 +58,8 @@ public class PlayerAnimationController : MonoBehaviour {
 			sprite.sprite = stillIdleFrame;
 			//sets the sprite if not moving
 			if (previousDirection == PlayerController.Direction.Left) {
-#if DEBUG
-				Debug.Log("Set sprite to the left facing one");
-#endif
-				//renderer.sprite = stillLeftFacingFrame;
 				sprite.transform.rotation = new Quaternion(0, 180, 0, 0);
 			} else if (previousDirection == PlayerController.Direction.Right) { 
-				#if DEBUG
-				Debug.Log("Set sprite to the right facing one");
-				#endif
 				sprite.transform.rotation = new Quaternion(0, 0, 0, 0);
 			}
 		}
@@ -69,5 +70,30 @@ public class PlayerAnimationController : MonoBehaviour {
 		animator = GetComponent<Animator>();
 		sprite = GetComponent<SpriteRenderer>();
 		stillIdleFrame = sprite.sprite;
+	}
+
+	public void UpdateHealthBar (float damage) {
+#if DEBUG
+		Debug.Log("This should take this much out of the health bar: " + damage/100f);
+#endif
+		if (healthBarAnimation == null) {
+			healthBarAnimation = AnimateHealthBar(damage/100f);
+			StartCoroutine(healthBarAnimation);
+		}
+	}
+
+	IEnumerator AnimateHealthBar (float healthChange) {
+		float steps = 10f;
+		float step = healthChange/steps;
+#if DEBUG
+		Debug.Log ("Entered the coroutine");
+#endif
+		for (int i = 0; i < steps; i++) {
+			healthBar.fillAmount -= step;
+			#if DEBUG
+				Debug.Log (i + " health bar is this long: " + healthBar.fillAmount);
+			#endif
+			yield return new WaitForEndOfFrame();
+		}
 	}
 }

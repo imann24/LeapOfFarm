@@ -11,4 +11,7 @@ public class Global {
 	public static KeyCode [] LeftButton = {KeyCode.LeftArrow, KeyCode.A};
 	public static KeyCode [] RightButton = {KeyCode.RightArrow, KeyCode.D};
 	public static KeyCode [] JumpButton = {KeyCode.Space};
+
+	public static Color Transparent = new Color(1, 1, 1, 0);
+	public static Color SemiTransparent = new Color(1, 1, 1, 0.5f);
 }

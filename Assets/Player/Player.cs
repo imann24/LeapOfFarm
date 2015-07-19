@@ -11,7 +11,7 @@ public class Player {
 
 
 	//event calls
-	public delegate void PlayerDamagedAction();
+	public delegate void PlayerDamagedAction(float damage);
 	public static event PlayerDamagedAction OnPlayerDamaged;
 	public delegate void PlayerKilledAction();
 	public static event PlayerKilledAction OnPlayerKilled;
@@ -31,11 +31,11 @@ public class Player {
 	}
 
 	//damages the player
-	public void damage (float damage) {
+	public void Damage (float damage) {
 		if (health - damage >= 0) {
 			health -= damage;
 			if (OnPlayerDamaged != null) {
-				OnPlayerDamaged();
+				OnPlayerDamaged(damage);
 			}
 		} else {
 			if (OnPlayerKilled != null) {

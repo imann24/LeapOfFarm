@@ -1,22 +1,25 @@
-﻿//#define DEBUG
+﻿#define DEBUG
 
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
 public class PlayerController : MonoBehaviour {
+	//tuning variables
+	public float damageTolerance = 10f; //determines how hard player has to fall to take damage
+
 	//events
 	public delegate void ChangeDirectionAction (Direction direction);
 	public static event ChangeDirectionAction OnChangeDirection;
 
 	//player variables
-	private Player player = new Player(100f, 2.5f, 2.5f);
+	public Player player = new Player(100f, 2.5f, 100f);
 	private float playerHeight;
 	private bool movingLeft;
 	private bool movingRight;
 	private bool jumping;
-	private float jumpForce = 300f;
 	private bool canJump;
+	private bool invulnerable;
 	private float baseSpeed = 0.25f;
 	private float speed;
 	private Direction currentDirection;
@@ -55,21 +58,23 @@ public class PlayerController : MonoBehaviour {
 	void OnCollisionEnter2D(Collision2D coll) {
 		if (coll.gameObject.tag == Global.SOLID_TAG) {
 			canJump = true;
-		} 
 
-#if DEBUG
-		Debug.Log(canJump);
-#endif
+			//prevents the player from being damaged
+			if (invulnerable) {
+				return;
+			}
+
+			if (coll.relativeVelocity.magnitude > 10f) {
+				player.Damage(coll.relativeVelocity.magnitude);
+				InvulnerableDuration(0.1f);
+			}
+		}
 	}
 
 	void OnCollisionExit2D(Collision2D coll) {
 		if (coll.gameObject.tag == Global.SOLID_TAG) {
 			canJump = false;
 		} 
-		
-		#if DEBUG
-		Debug.Log(canJump);
-		#endif
 	}
 
 	float HorizontalMovement () {
@@ -87,9 +92,6 @@ public class PlayerController : MonoBehaviour {
 			currentDirection = UpdateDirection(translation);
 			if (OnChangeDirection != null) {
 				OnChangeDirection(currentDirection);
-#if DEBUG
-				Debug.Log("changing directioni to :" + currentDirection);
-#endif
 			}
 		}
 		return transform.position.x + translation;
@@ -140,7 +142,7 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	public void Jump () {
-		GetComponent<Rigidbody2D>().AddForce(new Vector2(0, jumpForce), ForceMode2D.Force);
+		GetComponent<Rigidbody2D>().AddForce(new Vector2(0, player.jumpHeight), ForceMode2D.Force);
 	}
 
 	public void LeftButtonDown () {
@@ -234,5 +236,9 @@ public class PlayerController : MonoBehaviour {
 			isAccelerating = (direction == Direction.Left)?leftKeyDown:rightKeyDown;
 			yield return new WaitForSeconds(0.1f);
 		} while (speed < 1 && isAccelerating); 
+	}
+	IEnumerator InvulnerableDuration (float seconds) {
+		yield return new WaitForSeconds(seconds);
+		invulnerable = false;
 	}
 }
