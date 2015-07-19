@@ -2,6 +2,10 @@
 using System.Collections;
 
 public class GridController : MonoBehaviour {
+	//grid sprites
+	public Sprite GoldPot, ClayPot;
+
+	//tuning variables
 	public int sizeOfGrid;
 	public GameObject gridSpace;
 	public float scale = 1.28f;

@@ -1,4 +1,4 @@
-﻿#define DEBUG
+﻿//#define DEBUG
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,22 +17,21 @@ public class PlayerAnimationController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		//sets event references
 		PlayerController.OnChangeDirection += ChangeDirection;
 		Player.OnPlayerDamaged += UpdateHealthBar;
 
+		//establishes component references
 		SetReferences();
 	}
 
+	//dereferences the animation event calls
 	void OnDestroy () {
 		PlayerController.OnChangeDirection -= ChangeDirection;
 		Player.OnPlayerDamaged -= UpdateHealthBar;
 	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
 
+	//plays the walking animation for the player	
 	private void ChangeDirection (PlayerController.Direction direction) {
 		PlayerController.Direction previousDirection;
 		animator.enabled = true;
@@ -71,24 +70,45 @@ public class PlayerAnimationController : MonoBehaviour {
 		sprite = GetComponent<SpriteRenderer>();
 		stillIdleFrame = sprite.sprite;
 	}
+	
+	//sets the player class
+	public void SetPlayer (Player player) {
+		this.player = player;
+	}
 
 	public void UpdateHealthBar (float damage) {
-		if (healthBarAnimation == null) {
-			healthBarAnimation = AnimateHealthBar(damage/100f);
-			StartCoroutine(healthBarAnimation);
+		if (healthBarAnimation != null) {
+			StopCoroutine(healthBarAnimation);
 		}
+		healthBarAnimation = AnimateHealthBar();
+		StartCoroutine(healthBarAnimation);
 	}
 
 	public void FillHealthBar () {
-		StartCoroutine(AnimateHealthBar(healthBar.fillAmount - 1f));
+		StartCoroutine(AnimateHealthBar());
 	}
 
-	IEnumerator AnimateHealthBar (float healthChange) {
+	IEnumerator AnimateHealthBar () {
+
+		float newValue = player.health/GetComponent<PlayerController>().PlayerHealth;
+		float oldValue = healthBar.fillAmount;
+		float healthChange = newValue - oldValue;
 		float steps = 10f;
 		float step = healthChange/steps;
-		for (int i = 0; i < steps; i++) {
-			healthBar.fillAmount -= step;
+
+		//gives it a little tolerance
+		while (Mathf.Abs(healthBar.fillAmount - newValue) < 0.05f) {
+			healthBar.fillAmount += step;
 			yield return new WaitForEndOfFrame();
 		}
+
+		//sets the health bar value
+		healthBar.fillAmount = newValue;
+
+		//sets the coroutine reference to null
+		healthBarAnimation = null;
+#if DEBUG
+		Debug.Log("Displayed health: " + healthBar.fillAmount * GetComponent<PlayerController>().PlayerHealth);
+#endif
 	}
 }

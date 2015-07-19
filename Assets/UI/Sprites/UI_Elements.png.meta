@@ -1,11 +1,13 @@
 fileFormatVersion: 2
 guid: 436f19a4c1f3a4b91ae4b6c553e31f33
-timeCreated: 1437277791
+timeCreated: 1437290999
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
     21300000: UI_Elements_0
     21300002: UI_Elements_1
+    21300004: UI_Elements_2
+    21300006: UI_Elements_3
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -68,6 +70,26 @@ TextureImporter:
         y: 873
         width: 406
         height: 84
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: UI_Elements_2
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 664
+        width: 149
+        height: 151
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: UI_Elements_3
+      rect:
+        serializedVersion: 2
+        x: 221
+        y: 664
+        width: 149
+        height: 151
       alignment: 0
       pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}

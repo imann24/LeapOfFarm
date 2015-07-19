@@ -1,4 +1,4 @@
-﻿#define DEBUG
+﻿//#define DEBUG
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,7 +6,10 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour {
 	//tuning variables
-	public float damageTolerance = 10f; //determines how hard player has to fall to take damage
+	public float PlayerHealth = 100f;
+	public float DamageTolerance = 10f; //determines how hard player has to fall to take damage
+	public float PlayerSpeed = 2.5f;
+	public float PlayerJumpHeight = 150f;
 	public Vector3 SpawnPosition;
 
 	//events
@@ -14,7 +17,7 @@ public class PlayerController : MonoBehaviour {
 	public static event ChangeDirectionAction OnChangeDirection;
 
 	//player variables
-	public Player player = new Player(100f, 2.5f, 150f);
+	public Player player;
 	private float playerHeight;
 	private bool movingLeft;
 	private bool movingRight;
@@ -39,12 +42,20 @@ public class PlayerController : MonoBehaviour {
 
 	public enum Direction {Left, Right, None};
 
+	//inititializing variables
+	void Awake () {
+		player = new Player(PlayerHealth, PlayerSpeed, PlayerJumpHeight);
+	}
+
 	// Use this for initialization
 	void Start () {
 		Global.Player = gameObject;
 		transform.position = SpawnPosition;
 
 		Player.OnPlayerKilled += RespawnPlayer;
+
+		//sets the player
+		GetComponent<PlayerAnimationController>().SetPlayer(player);
 	}
 
 	void OnDestroy () {
@@ -63,14 +74,11 @@ public class PlayerController : MonoBehaviour {
 			RespawnPlayer();
 		}
 	}
-
-	void OnColliderEnter () {
-
-	}
-
-
+	
 	void OnCollisionEnter2D(Collision2D coll) {
-		if (coll.gameObject.tag == Global.SOLID_TAG) {
+		if (coll.gameObject.tag == Global.SOLID_TAG && 
+		    coll.transform.position.y < transform.position.y && 
+		    Mathf.Abs (transform.position.x - coll.transform.position.x) < 0.5f ) {
 			canJump = true;
 
 			//prevents the player from being damaged
