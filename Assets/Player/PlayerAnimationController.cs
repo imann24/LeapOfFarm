@@ -73,26 +73,21 @@ public class PlayerAnimationController : MonoBehaviour {
 	}
 
 	public void UpdateHealthBar (float damage) {
-#if DEBUG
-		Debug.Log("This should take this much out of the health bar: " + damage/100f);
-#endif
 		if (healthBarAnimation == null) {
 			healthBarAnimation = AnimateHealthBar(damage/100f);
 			StartCoroutine(healthBarAnimation);
 		}
 	}
 
+	public void FillHealthBar () {
+		StartCoroutine(AnimateHealthBar(healthBar.fillAmount - 1f));
+	}
+
 	IEnumerator AnimateHealthBar (float healthChange) {
 		float steps = 10f;
 		float step = healthChange/steps;
-#if DEBUG
-		Debug.Log ("Entered the coroutine");
-#endif
 		for (int i = 0; i < steps; i++) {
 			healthBar.fillAmount -= step;
-			#if DEBUG
-				Debug.Log (i + " health bar is this long: " + healthBar.fillAmount);
-			#endif
 			yield return new WaitForEndOfFrame();
 		}
 	}

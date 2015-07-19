@@ -7,13 +7,14 @@ using System.Collections;
 public class PlayerController : MonoBehaviour {
 	//tuning variables
 	public float damageTolerance = 10f; //determines how hard player has to fall to take damage
+	public Vector3 SpawnPosition;
 
 	//events
 	public delegate void ChangeDirectionAction (Direction direction);
 	public static event ChangeDirectionAction OnChangeDirection;
 
 	//player variables
-	public Player player = new Player(100f, 2.5f, 100f);
+	public Player player = new Player(100f, 2.5f, 150f);
 	private float playerHeight;
 	private bool movingLeft;
 	private bool movingRight;
@@ -27,8 +28,10 @@ public class PlayerController : MonoBehaviour {
 	//for touch input 
 	private bool leftKeyDown;
 	private bool leftTouchDown;
+	private bool leftAxisDown;
 	private bool rightKeyDown;
 	private bool rightTouchDown;
+	private bool rightAxisDown;
 
 	//coroutine references
 	private IEnumerator jumpCoroutine;
@@ -39,6 +42,13 @@ public class PlayerController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		Global.Player = gameObject;
+		transform.position = SpawnPosition;
+
+		Player.OnPlayerKilled += RespawnPlayer;
+	}
+
+	void OnDestroy () {
+		Player.OnPlayerKilled -= RespawnPlayer;
 	}
 	
 	// Update is called once per frame
@@ -48,6 +58,10 @@ public class PlayerController : MonoBehaviour {
 
 		//controls player movement
 		UpdatePosition();
+
+		if (Input.GetKeyDown(KeyCode.R)) {
+			RespawnPlayer();
+		}
 	}
 
 	void OnColliderEnter () {
@@ -67,6 +81,9 @@ public class PlayerController : MonoBehaviour {
 			if (coll.relativeVelocity.magnitude > 10f) {
 				player.Damage(coll.relativeVelocity.magnitude);
 				InvulnerableDuration(0.1f);
+#if DEBUG
+				Debug.Log("Player health: " + player.health);
+#endif
 			}
 		}
 	}
@@ -94,6 +111,7 @@ public class PlayerController : MonoBehaviour {
 				OnChangeDirection(currentDirection);
 			}
 		}
+
 		return transform.position.x + translation;
 	}
 
@@ -178,9 +196,14 @@ public class PlayerController : MonoBehaviour {
 
 		if (!leftTouchDown) {
 			foreach (KeyCode key in Global.LeftButton) {
-				if (Input.GetKeyDown(key) || Input.GetAxis("Horizontal") < 0) {
+				if (Input.GetKeyDown(key) ||(Input.GetAxis("Horizontal") < 0 && !leftAxisDown)) {
 					leftKeyDown = true;
 					LeftButtonPressed();
+					if (Input.GetAxis("Horizontal") < 0) {
+						leftAxisDown = true;
+					} else {
+						leftAxisDown = false;
+					}
 					break;
 				} 
 			}
@@ -196,8 +219,14 @@ public class PlayerController : MonoBehaviour {
 
 		if (!rightTouchDown) {
 			foreach (KeyCode key in Global.RightButton) {
-				if (Input.GetKeyDown(key) || Input.GetAxis("Horizontal") > 0) {
+				if (Input.GetKeyDown(key) || (Input.GetAxis("Horizontal") > 0 && !rightAxisDown)) {
+					rightKeyDown = true;
 					RightButtonPressed();
+					if (Input.GetAxis("Horizontal") > 0) {
+						rightAxisDown = true;
+					} else {
+						rightAxisDown = false;
+					}
 				} 
 			}
 
@@ -230,15 +259,22 @@ public class PlayerController : MonoBehaviour {
 
 	IEnumerator HorizontalSpeed (Direction direction) { 
 		speed = baseSpeed;
-		bool isAccelerating;
+		bool isAccelerating = false;
 		do {
 			speed += 0.25f;
 			isAccelerating = (direction == Direction.Left)?leftKeyDown:rightKeyDown;
 			yield return new WaitForSeconds(0.1f);
-		} while (speed < 1 && isAccelerating); 
+		} while (speed < 1.5f && isAccelerating); 
 	}
 	IEnumerator InvulnerableDuration (float seconds) {
 		yield return new WaitForSeconds(seconds);
 		invulnerable = false;
+	}
+
+	public void RespawnPlayer () {
+		transform.position = SpawnPosition;
+		player.resetPlayerStats();
+		GetComponent<PlayerAnimationController>().FillHealthBar();
+
 	}
 }

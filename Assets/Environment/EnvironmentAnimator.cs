@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#define DEBUG
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
@@ -18,15 +19,11 @@ public class EnvironmentAnimator : MonoBehaviour {
 		//unlinks the animation
 		Player.OnPlayerDamaged -= DamageAnimation;
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
 
 	private void DamageAnimation (float damage) {
 		float fadeTime = animationTime/2.0f;
-		ColorFade(Global.Transparent, Global.SemiTransparent, fadeTime, true);
+		StartCoroutine(ColorFade(Global.Transparent, Global.SemiTransparent, fadeTime, true));
 	}
 
 	IEnumerator ColorFade (Color startColor, Color endColor, float seconds) {
