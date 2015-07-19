@@ -78,7 +78,8 @@ public class PlayerController : MonoBehaviour {
 	void OnCollisionEnter2D(Collision2D coll) {
 		if (coll.gameObject.tag == Global.SOLID_TAG && 
 		    coll.transform.position.y < transform.position.y && 
-		    Mathf.Abs (transform.position.x - coll.transform.position.x) < 0.5f ) {
+		    Mathf.Abs (transform.position.x - coll.transform.position.x) < 0.5f 
+		    ) {
 			canJump = true;
 
 			//prevents the player from being damaged
@@ -168,7 +169,11 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	public void Jump () {
-		GetComponent<Rigidbody2D>().AddForce(new Vector2(0, player.jumpHeight), ForceMode2D.Force);
+		//if (canJump) {
+			GetComponent<Rigidbody2D>().AddForce(new Vector2(0, player.jumpHeight), ForceMode2D.Force);
+			jumping = true;
+			StartCoroutine(HaltJump());
+		//}
 	}
 
 	public void LeftButtonDown () {
@@ -209,8 +214,7 @@ public class PlayerController : MonoBehaviour {
 					LeftButtonPressed();
 					if (Input.GetAxis("Horizontal") < 0) {
 						leftAxisDown = true;
-					} else {
-						leftAxisDown = false;
+						rightAxisDown = false;
 					}
 					break;
 				} 
@@ -232,9 +236,8 @@ public class PlayerController : MonoBehaviour {
 					RightButtonPressed();
 					if (Input.GetAxis("Horizontal") > 0) {
 						rightAxisDown = true;
-					} else {
-						rightAxisDown = false;
-					}
+						leftAxisDown = false;
+					} 
 				} 
 			}
 
@@ -245,6 +248,11 @@ public class PlayerController : MonoBehaviour {
 					break;
 				} 
 			}
+		}
+
+		if (Input.GetAxis("Horizontal") == 0) {
+			rightAxisDown = false;
+			leftAxisDown = false;
 		}
 
 		foreach (KeyCode key in Global.JumpButton) {

@@ -62,8 +62,15 @@ public class GridSpace : MonoBehaviour {
 		} else if (type == Space.PickUp) {
 			ToggleSolid(false);
 			ToggleSprite(true);
+			SetSprite(transform.parent.GetComponent<GridController>().GoldPot);
+			transform.localScale = new Vector3(0.25f, 0.25f);
+			sprite.transform.position += Vector3.down * 1.75f;
 			tag = Global.PICK_UP_TAG;
 		}
+	}
+
+	public void SetSprite (Sprite sprite) {
+		this.sprite.sprite = sprite;
 	}
 	
 	void OnTriggerEnter2D(Collider2D other) {
