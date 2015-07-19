@@ -1,4 +1,4 @@
-﻿//#define DEBUG
+﻿#define DEBUG
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,9 +7,9 @@ using System.Collections;
 public class PlayerController : MonoBehaviour {
 	//tuning variables
 	public float PlayerHealth = 100f;
-	public float DamageTolerance = 10f; //determines how hard player has to fall to take damage
+	public float DamageTolerance = 15f; //determines how hard player has to fall to take damage
 	public float PlayerSpeed = 2.5f;
-	public float PlayerJumpHeight = 150f;
+	public float PlayerJumpHeight = 100f;
 	public Vector3 SpawnPosition;
 
 	//events
@@ -76,18 +76,23 @@ public class PlayerController : MonoBehaviour {
 	}
 	
 	void OnCollisionEnter2D(Collision2D coll) {
-		if (coll.gameObject.tag == Global.SOLID_TAG && 
-		    coll.transform.position.y < transform.position.y && 
-		    Mathf.Abs (transform.position.x - coll.transform.position.x) < 0.5f 
+		if (coll.gameObject.tag == Global.SOLID_TAG 
+		    &&  coll.transform.position.y < transform.position.y 
+		   //	&& coll.relativeVelocity.y < 0
+		    // &&  Mathf.Abs (transform.position.x - coll.transform.position.x) < 0.5f 
 		    ) {
 			canJump = true;
+
+			#if DEBUG
+				Debug.Log("Entered jump zone: " + coll.gameObject.name + "Can jump: " + canJump);
+			#endif
 
 			//prevents the player from being damaged
 			if (invulnerable) {
 				return;
 			}
 
-			if (coll.relativeVelocity.magnitude > 10f) {
+			if (coll.relativeVelocity.magnitude > DamageTolerance) {
 				player.Damage(coll.relativeVelocity.magnitude);
 				InvulnerableDuration(0.1f);
 #if DEBUG
@@ -98,9 +103,16 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	void OnCollisionExit2D(Collision2D coll) {
+#if DEBUG
+		Debug.Log(coll.relativeVelocity.magnitude);
+#endif
 		if (coll.gameObject.tag == Global.SOLID_TAG) {
 			canJump = false;
 		} 
+
+		#if DEBUG
+			Debug.Log("Exited jump zone: " + coll.gameObject.name + "Can jump: " + canJump);
+		#endif
 	}
 
 	float HorizontalMovement () {
@@ -169,11 +181,11 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	public void Jump () {
-		//if (canJump) {
+		if (canJump && !jumping) {
 			GetComponent<Rigidbody2D>().AddForce(new Vector2(0, player.jumpHeight), ForceMode2D.Force);
 			jumping = true;
 			StartCoroutine(HaltJump());
-		//}
+		}
 	}
 
 	public void LeftButtonDown () {
@@ -257,9 +269,7 @@ public class PlayerController : MonoBehaviour {
 
 		foreach (KeyCode key in Global.JumpButton) {
 			if ((Input.GetKeyDown(key) || Input.GetButton("Jump"))&& canJump) {
-				jumping = true;
 				Jump ();
-				StartCoroutine(HaltJump());
 				break;
 			} 
 		}

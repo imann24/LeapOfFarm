@@ -53,6 +53,9 @@ public class GridController : MonoBehaviour {
 			square.transform.parent = transform;
 			square.GetComponent<GridSpace>().SetBehavior(GridSpace.Space.Solid);
 			square.name = "GridSpaceRight";
+
 		}
+		//destroys the original object
+		Destroy (gridSpace);
 	}
 }
